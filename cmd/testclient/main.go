@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"strconv"
 )
 
 const udpAddr = "100.121.131.130:5060"
@@ -23,8 +24,20 @@ func main() {
 	}
 	defer conn.Close()
 
-	localAddr := conn.LocalAddr().(*net.UDPAddr).String()
-	slog.Info("source IP", localAddr)
+	localAddrPort := conn.LocalAddr().(*net.UDPAddr).String()
+	slog.Info("source", localAddrPort)
+	localAddr, localPortStr, err := net.SplitHostPort(localAddrPort)
+
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+
+	localPort, err := strconv.Atoi(localPortStr)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 
 	reqLine := model.RequestLine{
 		Method:     model.SIPMethodRegister,
@@ -36,8 +49,8 @@ func main() {
 		CallID: "1234567890",
 		Contract: model.Contract{
 			UserPart: sipUser,
-			HostPart: "100.85.93.61", // TODO: 取得方法を考える
-			HostPort: 33333,          // TODO:  取得方法を考える 違う
+			HostPart: localAddr,
+			HostPort: 33333, // TODO:  取得方法を考える 違う
 		},
 		CSeq: model.CSeq{
 			Seq:    1,
@@ -53,8 +66,8 @@ func main() {
 		},
 		Via: model.Via{
 			Transport:     "UDP",
-			SentByAddress: "100.85.93.61", // TODO: 取得方法を考える
-			SentByPort:    33333,          // TODO:  取得方法を考える 違う
+			SentByAddress: localAddr,
+			SentByPort:    localPort,
 		},
 		UserAgent: "YRP yabasugi Call Client",
 	}

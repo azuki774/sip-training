@@ -42,15 +42,16 @@ type MessageHeader struct {
 
 func (m *MessageHeader) Build() string {
 	var s string
-	s += "Call-ID:" + m.CallID + "\n"
-	s += "Contract:" + m.Contract.Build() + "\n"
-	s += "CSeq:" + m.CSeq.Build() + "\n"
-	s += "From:" + m.From.Build() + "\n"
-	s += "To:" + m.To.Build() + "\n"
-	s += "Via:" + m.Via.Build() + "\n"
-	s += fmt.Sprintf("Max-Forwards:%d", m.MaxForwards) + "\n"
-	s += "User-Agent:" + m.UserAgent + "\n"
-	s += "Content-Length:0" + "\n"
+	s += "Call-ID: " + m.CallID + "\n"
+	s += "Contract: " + m.Contract.Build() + "\n"
+	s += "CSeq: " + m.CSeq.Build() + "\n"
+	s += "From: " + m.From.Build() + "\n"
+	s += "To: " + m.To.Build() + "\n"
+	s += "Via: " + m.Via.Build() + "\n"
+	s += fmt.Sprintf("Max-Forwards: %d", m.MaxForwards) + "\n"
+	s += "User-Agent: " + m.UserAgent + "\n"
+	s += "Content-Length: 0" + "\n"
+	s += "\n" // ヘッダ終わりは空行
 	return s
 }
 
