@@ -2,6 +2,7 @@ package main
 
 import (
 	"azuki774/sip-training/internal/model"
+	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -25,7 +26,7 @@ func main() {
 	defer conn.Close()
 
 	localAddrPort := conn.LocalAddr().(*net.UDPAddr).String()
-	slog.Info("source", localAddrPort)
+	slog.Info("get source info", "source", localAddrPort)
 	localAddr, localPortStr, err := net.SplitHostPort(localAddrPort)
 
 	if err != nil {
@@ -41,16 +42,17 @@ func main() {
 
 	reqLine := model.RequestLine{
 		Method:     model.SIPMethodRegister,
-		RequestURI: "sip:100.121.131.130",
+		RequestURI: fmt.Sprintf("sip:%v", localAddr),
 		Transport:  "UDP SIP/2.0",
 	}
 
 	reqHeader := model.MessageHeader{
 		CallID: "1234567890",
-		Contract: model.Contract{
-			UserPart: sipUser,
-			HostPart: localAddr,
-			HostPort: 33333, // TODO:  取得方法を考える 違う
+		Contact: model.Contact{
+			UserPart:  sipUser,
+			HostPart:  localAddr,
+			HostPort:  localPort,
+			Parameter: []string{"", "transport=UDP", "rinstance=1111111111111111"}, // 先頭に;をつけるため "" がいる
 		},
 		CSeq: model.CSeq{
 			Seq:    1,
@@ -68,8 +70,11 @@ func main() {
 			Transport:     "UDP",
 			SentByAddress: localAddr,
 			SentByPort:    localPort,
+			Parameter:     []string{"", "branch=zzzzzzzzzzzzz", "rport"}, // 先頭に;をつけるため "" がいる
 		},
-		UserAgent: "YRP yabasugi Call Client",
+		MaxForwards: 70,
+		Expires:     60,
+		UserAgent:   "YRP yabasugi Call Client",
 	}
 
 	req := append([]byte(reqLine.Build()), []byte(reqHeader.Build())...)

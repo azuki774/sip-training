@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -26,7 +27,7 @@ func stringsOptBuild(ss []string) (s string) {
 
 type MessageHeader struct {
 	CallID        string   // Call-ID
-	Contract      Contract // Contract
+	Contact       Contact  // Contact
 	CSeq          CSeq     // CSeq
 	From          From     // From
 	To            To       // To
@@ -34,45 +35,30 @@ type MessageHeader struct {
 	Allow         []string // Allow
 	Supported     []string // Supported
 	AllowEvents   []string // Allow-Events
-	MaxForwards   int      // Max-Forwards
 	UserAgent     string   // User-Agent
+	MaxForwards   int      // Max-Forwards
 	Expires       int      // Expires
 	ContentLength int      // Content-Length
 }
 
 func (m *MessageHeader) Build() string {
 	var s string
-	s += "Call-ID: " + m.CallID + "\n"
-	s += "Contract: " + m.Contract.Build() + "\n"
-	s += "CSeq: " + m.CSeq.Build() + "\n"
-	s += "From: " + m.From.Build() + "\n"
-	s += "To: " + m.To.Build() + "\n"
-	s += "Via: " + m.Via.Build() + "\n"
-	s += fmt.Sprintf("Max-Forwards: %d", m.MaxForwards) + "\n"
-	s += "User-Agent: " + m.UserAgent + "\n"
-	s += "Content-Length: 0" + "\n"
-	s += "\n" // ヘッダ終わりは空行
+	s += "Call-ID: " + m.CallID + "\r\n"
+	s += "Contact: " + m.Contact.Build() + "\r\n"
+	s += "CSeq: " + m.CSeq.Build() + "\r\n"
+	s += "From: " + m.From.Build() + "\r\n"
+	s += "To: " + m.To.Build() + "\r\n"
+	s += "Via: " + m.Via.Build() + "\r\n"
+	s += fmt.Sprintf("Max-Forwards: %d", m.MaxForwards) + "\r\n"
+	s += "User-Agent: " + m.UserAgent + "\r\n"
+	s += "Max-Forwards: " + strconv.Itoa(m.Expires) + "\r\n"
+	s += "Expires: " + strconv.Itoa(m.Expires) + "\r\n"
+	s += "Content-Length: 0" + "\r\n"
+	s += "\r\n" // ヘッダ終わりは空行
 	return s
 }
 
-type Via struct {
-	Transport     string   // Transport
-	SentByAddress string   // Sent-by Address
-	SentByPort    int      // Sent-by port
-	Parameter     []string // Branch, RPort
-}
-
-func (v *Via) Build() string {
-	var s string
-	s += "SIP/2.0/"
-	s += v.Transport
-	s += " " // SP
-	s += fmt.Sprintf("%s:%d", v.SentByAddress, v.SentByPort)
-	s += stringsOptBuild(v.Parameter)
-	return s
-}
-
-type Contract struct {
+type Contact struct {
 	// ContractURI
 	UserPart  string
 	HostPart  string
@@ -80,9 +66,11 @@ type Contract struct {
 	Parameter []string
 }
 
-func (c *Contract) Build() string {
+func (c *Contact) Build() string {
 	// <sip:6001@100.121.131.130;transport=UDP>
-	s := fmt.Sprintf("<sip:%s@%s:%d>", c.UserPart, c.HostPart, c.HostPort)
+	s := fmt.Sprintf("<sip:%s@%s:%d", c.UserPart, c.HostPart, c.HostPort)
+	s += stringsOptBuild(c.Parameter) // Contract フィールドはURIオプショなので < > の間に入る
+	s += ">"
 	return s
 }
 
@@ -126,5 +114,22 @@ func (t *To) Build() string {
 	if t.Tag != "" {
 		s += fmt.Sprintf("tag=%s", t.Tag)
 	}
+	return s
+}
+
+type Via struct {
+	Transport     string   // Transport
+	SentByAddress string   // Sent-by Address
+	SentByPort    int      // Sent-by port
+	Parameter     []string // Branch, RPort
+}
+
+func (v *Via) Build() string {
+	var s string
+	s += "SIP/2.0/"
+	s += v.Transport
+	s += " " // SP
+	s += fmt.Sprintf("%s:%d", v.SentByAddress, v.SentByPort)
+	s += stringsOptBuild(v.Parameter)
 	return s
 }
