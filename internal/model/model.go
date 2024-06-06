@@ -21,19 +21,20 @@ func (r *RequestLine) Build() string {
 }
 
 func stringsOptBuild(ss []string) (s string) {
-	return strings.Join(ss, ",") // "a,b,c"
+	return strings.Join(ss, ";") // "a;b;c"
 }
 
 type MessageHeader struct {
 	CallID        string   // Call-ID
-	Contract      string   // Contract
+	Contract      Contract // Contract
 	CSeq          CSeq     // CSeq
 	From          From     // From
 	To            To       // To
-	Via           From     // Via
+	Via           Via      // Via
 	Allow         []string // Allow
 	Supported     []string // Supported
 	AllowEvents   []string // Allow-Events
+	MaxForwards   int      // Max-Forwards
 	UserAgent     string   // User-Agent
 	Expires       int      // Expires
 	ContentLength int      // Content-Length
@@ -42,10 +43,12 @@ type MessageHeader struct {
 func (m *MessageHeader) Build() string {
 	var s string
 	s += "Call-ID:" + m.CallID + "\n"
-	s += "Contract:" + m.Contract + "\n"
+	s += "Contract:" + m.Contract.Build() + "\n"
 	s += "CSeq:" + m.CSeq.Build() + "\n"
 	s += "From:" + m.From.Build() + "\n"
 	s += "To:" + m.To.Build() + "\n"
+	s += "Via:" + m.Via.Build() + "\n"
+	s += fmt.Sprintf("Max-Forwards:%d", m.MaxForwards) + "\n"
 	s += "User-Agent:" + m.UserAgent + "\n"
 	s += "Content-Length:0" + "\n"
 	return s
@@ -55,7 +58,17 @@ type Via struct {
 	Transport     string   // Transport
 	SentByAddress string   // Sent-by Address
 	SentByPort    int      // Sent-by port
-	Parameter     []string // TODO: not yet implement, Branch, RPort
+	Parameter     []string // Branch, RPort
+}
+
+func (v *Via) Build() string {
+	var s string
+	s += "SIP/2.0/"
+	s += v.Transport
+	s += " " // SP
+	s += fmt.Sprintf("%s:%d", v.SentByAddress, v.SentByPort)
+	s += stringsOptBuild(v.Parameter)
+	return s
 }
 
 type Contract struct {
@@ -64,6 +77,12 @@ type Contract struct {
 	HostPart  string
 	HostPort  int
 	Parameter []string
+}
+
+func (c *Contract) Build() string {
+	// <sip:6001@100.121.131.130;transport=UDP>
+	s := fmt.Sprintf("<sip:%s@%s:%d>", c.UserPart, c.HostPart, c.HostPort)
+	return s
 }
 
 type CSeq struct {
