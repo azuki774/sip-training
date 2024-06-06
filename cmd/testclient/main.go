@@ -23,7 +23,13 @@ func main() {
 		RequestURI: "sip:100.121.131.130",
 		Transport:  "UDP SIP/2.0",
 	}
-	_, err = conn.Write([]byte(reqLine.Build()))
+
+	reqHeader := model.MessageHeader{
+		UserAgent: "YRP yabasugi Call Client",
+	}
+
+	req := append([]byte(reqLine.Build()), []byte(reqHeader.Build())...)
+	_, err = conn.Write(req)
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
