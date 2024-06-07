@@ -84,4 +84,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	// catch response
+	// buf := make([]byte, 8192)
+	// n, _ := conn.Read(buf)
+	// resStr := string(buf[:n])
+
 }
