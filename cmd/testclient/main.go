@@ -44,7 +44,7 @@ func main() {
 
 	reqLine := model.RequestLine{
 		Method:     model.SIPMethodRegister,
-		RequestURI: fmt.Sprintf("sip:%v", localAddr),
+		RequestURI: fmt.Sprintf("sip:%v;transport=UDP", sipSrvAddr),
 		Transport:  "UDP SIP/2.0",
 	}
 
@@ -109,8 +109,8 @@ func main() {
 		OpaqueValue:        strings.Replace(wwwauthElmsMap["opaque"], "\"", "", -1), // (unq) opaque
 		Algorithm:          wwwauthElmsMap["algorithm"],                             // algorithm
 		QOP:                strings.Replace(wwwauthElmsMap["qop"], "\"", "", -1),    // qop
-		URI:        "sip:" + sipSrvAddr + ";transport=UDP", // uri
-		NonceCount: "00000001",                             // nc
+		URI:                reqLine.RequestURI,                                      // uri
+		NonceCount:         "00000001",                                              // nc
 		//
 		CNonse:   "1b043ccbff85cf2b8cac03898ebb6267", // cnonce // TODO: fix
 		Response: "",                                 // response
@@ -119,7 +119,7 @@ func main() {
 
 	reqHeader.CSeq.Seq += 1
 	reqHeader.WWWAuthenticate = wwwAuthField
-
+	fmt.Println(reqHeader.WWWAuthenticate)
 	req = append([]byte(reqLine.Build()), []byte(reqHeader.Build())...)
 	_, err = conn.Write(req) // Auth REGISTER
 	if err != nil {
