@@ -84,8 +84,8 @@ func TestWWWAuthenticate_ComputeResponse(t *testing.T) {
 				CNonse:             tt.fields.CNonse,
 				Response:           tt.fields.Response,
 			}
-			if gotResponse := w.ComputeResponse(tt.args.method, tt.args.password); gotResponse != tt.wantResponse {
-				t.Errorf("WWWAuthenticate.ComputeResponse() = %v, want %v", gotResponse, tt.wantResponse)
+			if w.ComputeResponse(tt.args.method, tt.args.password); w.Response != tt.wantResponse {
+				t.Errorf("WWWAuthenticate.ComputeResponse() = %v, want %v", w.Response, tt.wantResponse)
 			}
 		})
 	}

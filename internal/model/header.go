@@ -34,8 +34,8 @@ func (m *MessageHeader) Build() string {
 	s += ColonFieldBuild("Max-Forwards", strconv.Itoa(m.MaxForwards))
 	s += ColonFieldBuild("User-Agent", m.UserAgent)
 	s += ColonFieldBuild("Expires", strconv.Itoa(m.Expires))
+	s += ColonFieldBuild("WWW-Authenticate", m.WWWAuthenticate.Build())
 	s += ColonFieldBuild("Content-Length", strconv.Itoa(0))
-	s += "Content-Length: 0" + "\r\n"
 	s += "\r\n" // ヘッダ終わりは空行
 	return s
 }
