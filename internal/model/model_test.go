@@ -5,6 +5,38 @@ import (
 	"testing"
 )
 
+func TestParseCommaEqualField(t *testing.T) {
+	type args struct {
+		str string
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]string
+	}{
+		{
+			name: `realm="asterisk",nonce="1717776386/7f3397156840745bea6a6edc5dd77098",opaque="1549f70617baaeb2",algorithm=MD5,qop="auth"`,
+			args: args{
+				str: `realm="asterisk",nonce="1717776386/7f3397156840745bea6a6edc5dd77098",opaque="1549f70617baaeb2",algorithm=MD5,qop="auth"`,
+			},
+			want: map[string]string{
+				"realm":     `"asterisk"`,
+				"nonce":     `"1717776386/7f3397156840745bea6a6edc5dd77098"`,
+				"opaque":    `"1549f70617baaeb2"`,
+				"algorithm": "MD5",
+				"qop":       `"auth"`,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ParseCommaEqualField(tt.args.str); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ParseCommaEqualField() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestParseColonField(t *testing.T) {
 	type args struct {
 		str string

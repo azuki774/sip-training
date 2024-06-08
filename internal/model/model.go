@@ -33,6 +33,27 @@ func ColonFieldBuild(fieldName string, value string) string {
 	return fmt.Sprintf("%s: %s\r\n", fieldName, value)
 }
 
+// コンマ区切り key = value をマップに変換
+func ParseCommaEqualField(str string) map[string]string {
+	// a = b, c = d ... { (a,b), (c,d)} というマップに変換
+	f := make(map[string]string)
+	commaSplit := strings.Split(str, ",") // a = b, c = d --> [a = b, c = d]
+
+	for _, es := range commaSplit {
+		// ex. CSeq: 1 REGISTER -> "CSeq", "1 REGISTER"
+		e := strings.SplitN(es, "=", 2)
+		if len(e) >= 2 {
+			// = が1つ以上含まれるものだけが対象
+			key := strings.TrimSpace(e[0])
+			value := strings.TrimSpace(e[1]) // 2つ以上 : がある場合はすべて value に入る
+			f[key] = value
+		}
+	}
+
+	return f
+}
+
+// fieldName: value の形式の string 入力をマップする。
 func ParseColonField(str string) map[string]string {
 	// a: bbbbb
 	// b: ccccc --> {(a, bbbb), (b, cccc)}

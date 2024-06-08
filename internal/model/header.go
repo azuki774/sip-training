@@ -1,24 +1,26 @@
 package model
 
 import (
+	"azuki774/sip-training/internal/digest"
 	"fmt"
 	"strconv"
 )
 
 type MessageHeader struct {
-	CallID        string   // Call-ID
-	Contact       Contact  // Contact
-	CSeq          CSeq     // CSeq
-	From          From     // From
-	To            To       // To
-	Via           Via      // Via
-	Allow         []string // Allow
-	Supported     []string // Supported
-	AllowEvents   []string // Allow-Events
-	UserAgent     string   // User-Agent
-	MaxForwards   int      // Max-Forwards
-	Expires       int      // Expires
-	ContentLength int      // Content-Length
+	CallID          string                 // Call-ID
+	Contact         Contact                // Contact
+	CSeq            CSeq                   // CSeq
+	From            From                   // From
+	To              To                     // To
+	Via             Via                    // Via
+	Allow           []string               // Allow
+	Supported       []string               // Supported
+	AllowEvents     []string               // Allow-Events
+	UserAgent       string                 // User-Agent
+	MaxForwards     int                    // Max-Forwards
+	Expires         int                    // Expires
+	WWWAuthenticate digest.WWWAuthenticate // WWW-Authenticate
+	ContentLength   int                    // Content-Length
 }
 
 func (m *MessageHeader) Build() string {
